@@ -1,0 +1,11 @@
+[project]
+name = "image-editor"
+version = "0.1.0"
+description = "一个用 OpenCV 实现的命令行图片信息查看与编辑工具"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.8",
+    "pillow>=10.0",
+]
