@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>图片工具箱 · 查看与编辑</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-text">
+        <span class="eyebrow">IMAGE TOOLKIT</span>
+        <h1>图片工具箱</h1>
+        <p>上传一张图片，查看基础信息，并完成缩放、裁剪、旋转、翻转、灰度化与格式转换。</p>
+      </div>
+      <div class="hero-steps" aria-hidden="true">
+        <span>1 上传</span>
+        <span class="arrow">→</span>
+        <span>2 编辑</span>
+        <span class="arrow">→</span>
+        <span>3 下载</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel preview-panel">
+        <div class="panel-head">
+          <h2>预览</h2>
+          <span id="previewBadge" class="badge">尚未上传</span>
+        </div>
+
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="上传图片">
+          <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.webp" hidden>
+          <div class="drop-icon" aria-hidden="true">↑</div>
+          <p><strong>拖拽图片到这里</strong>，或点击选择文件</p>
+          <small>支持 JPG / PNG / BMP / WEBP，单张不超过 20 MB</small>
+        </div>
+
+        <div id="previewWrap" class="preview-wrap hidden">
+          <div class="checker">
+            <img id="previewImage" alt="图片预览">
+          </div>
+          <div class="preview-actions">
+            <button id="restoreBtn" class="ghost" type="button" disabled>恢复原图</button>
+            <a id="downloadBtn" class="primary disabled" href="#" aria-disabled="true">下载结果</a>
+          </div>
+          <p id="resultName" class="result-name"></p>
+        </div>
+
+        <div class="info-section">
+          <h3>图片信息</h3>
+          <dl id="infoGrid" class="info-grid">
+            <div class="empty-info">上传图片后显示文件名、格式、尺寸、颜色模式和大小。</div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="panel-head">
+          <h2>编辑操作</h2>
+          <span id="modeBadge" class="badge subtle">未加载</span>
+        </div>
+
+        <div id="opTabs" class="op-grid" role="tablist" aria-label="编辑操作">
+          <button class="op active" data-op="resize" type="button" disabled>缩放</button>
+          <button class="op" data-op="crop" type="button" disabled>裁剪</button>
+          <button class="op" data-op="rotate" type="button" disabled>旋转</button>
+          <button class="op" data-op="flip" type="button" disabled>翻转</button>
+          <button class="op" data-op="gray" type="button" disabled>灰度化</button>
+          <button class="op" data-op="convert" type="button" disabled>格式转换</button>
+        </div>
+
+        <div id="params" class="params">
+          <p class="hint">请先上传图片。</p>
+        </div>
+
+        <label class="field format-field">
+          <span>输出格式</span>
+          <select id="formatSelect">
+            <option value="keep">保持原格式</option>
+            <option value="jpg">JPG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WEBP</option>
+            <option value="bmp">BMP</option>
+          </select>
+        </label>
+
+        <button id="applyBtn" class="primary wide" type="button" disabled>应用并预览</button>
+        <p id="message" class="message" role="status"></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>所有处理都在本机完成，结果会保存为新文件，不会覆盖原图。</p>
+      <p>也可以继续使用命令行版本：<code>uv run python main.py --help</code></p>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
