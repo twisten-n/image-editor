@@ -8,7 +8,7 @@ from pathlib import Path
 
 from image_info import format_info, format_size, get_image_info
 from image_io import ImageError, read_image, save_image
-from image_ops import crop, flip, resize, rotate
+from image_ops import crop, flip, resize, rotate, to_grayscale
 
 
 def default_output(input_path: Path, operation: str) -> Path:
@@ -66,6 +66,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="horizontal 为水平翻转，vertical 为垂直翻转",
     )
 
+    gray_parser = subparsers.add_parser("gray", help="转换为灰度图")
+    gray_parser.add_argument("input", help="图片路径")
+    gray_parser.add_argument("-o", "--output", help="输出文件路径（默认在原图旁新建文件）")
+
+    convert_parser = subparsers.add_parser("convert", help="转换图片格式")
+    convert_parser.add_argument("input", help="图片路径")
+    convert_parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        help="输出文件路径，扩展名决定目标格式，例如 out.png、out.jpg",
+    )
+
     return parser
 
 
@@ -90,6 +103,10 @@ def main(argv: list[str] | None = None) -> int:
             result = rotate(image, args.angle)
         elif args.command == "flip":
             result = flip(image, args.direction)
+        elif args.command == "gray":
+            result = to_grayscale(image)
+        elif args.command == "convert":
+            result = image
         else:  # 正常情况下不会走到这里
             raise ImageError(f"未知命令: {args.command}")
 

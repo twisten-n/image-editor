@@ -57,6 +57,10 @@ def save_image(image: np.ndarray, path: str | Path, source: str | Path) -> Path:
 
     path.parent.mkdir(parents=True, exist_ok=True)
 
+    # JPG / BMP 不支持透明通道，带 alpha 的图必须先转成 BGR，否则保存会失败。
+    if path.suffix.lower() in {".jpg", ".jpeg", ".bmp"} and image.ndim == 3 and image.shape[2] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+
     # 与 imread 对称，使用 imencode + tofile 兼容中文路径。
     success, buffer = cv2.imencode(suffix, image)
     if not success:

@@ -69,3 +69,13 @@ def flip(image: np.ndarray, direction: str) -> np.ndarray:
     if direction == "vertical":
         return cv2.flip(image, 0)
     raise ImageError(f"翻转方向只支持 horizontal 或 vertical，收到: {direction}")
+
+
+def to_grayscale(image: np.ndarray) -> np.ndarray:
+    """把彩色图转换成灰度图；已经是灰度图时原样返回副本。"""
+    if image.ndim == 2:
+        return image.copy()
+    if image.shape[2] == 4:
+        return cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
