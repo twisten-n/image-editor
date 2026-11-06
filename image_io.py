@@ -38,3 +38,28 @@ def read_image(path: str | Path) -> np.ndarray:
     if image is None:
         raise ImageError(f"不是有效的图片文件: {path}")
     return image
+
+
+def save_image(image: np.ndarray, path: str | Path, source: str | Path) -> Path:
+    """把图片保存为新文件，并返回保存路径。
+
+    参数 source 是原图路径，用于阻止覆盖原图。
+    """
+    path = Path(path)
+    suffix = path.suffix.lower()
+
+    if suffix not in SUPPORTED_SUFFIXES:
+        supported = ", ".join(sorted(SUPPORTED_SUFFIXES))
+        raise ImageError(f"不支持保存为 {suffix or '无扩展名'} 格式，可用格式: {supported}")
+
+    if path.resolve() == Path(source).resolve():
+        raise ImageError("输出路径不能与原图相同，请换一个文件名以保护原图")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # 与 imread 对称，使用 imencode + tofile 兼容中文路径。
+    success, buffer = cv2.imencode(suffix, image)
+    if not success:
+        raise ImageError(f"保存失败，无法编码为 {suffix} 格式: {path}")
+    buffer.tofile(str(path))
+    return path
