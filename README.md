@@ -1,8 +1,8 @@
 # 图片信息查看与编辑工具
 
-一个用 Python 编写的**命令行**图片处理工具：可以查看图片的基础信息，并完成缩放、
-裁剪、旋转、翻转、灰度化和格式转换等简单编辑。所有编辑结果都会另存为新文件，
-不会覆盖原图。
+一个用 Python 编写的图片处理工具，提供**网页版**和**命令行版**两种使用方式：可以查看图片的
+基础信息，并完成缩放、裁剪、旋转、翻转、灰度化和格式转换等简单编辑。所有编辑结果都会
+另存为新文件，不会覆盖原图。
 
 ## 1. 项目介绍
 
@@ -24,10 +24,13 @@
 | 灰度化 | `gray` | 彩色图转灰度图 |
 | 格式转换 | `convert` | 例如 PNG 与 JPG 互转，自动处理透明通道 |
 
+> 网页版在页面上以按钮和表单提供同样的功能，具体操作见 3.2 节。
+
 ### 1.3 程序形式与技术栈
 
-- 形式：命令行（CLI）
+- 形式：**网页版（主）+ 命令行版**，两种方式共用同一套图片处理函数
 - 语言：Python 3.10+
+- 网页框架：Flask
 - 图片处理：OpenCV（`opencv-python`）+ NumPy
 - 图片信息读取：Pillow
 
@@ -72,10 +75,52 @@ python --version
 ```bash
 python -m venv .venv
 source .venv/bin/activate          # Windows 使用 .venv\Scripts\activate
-pip install "numpy>=1.24" "opencv-python>=4.8" "pillow>=10.0"
+pip install "numpy>=1.24" "opencv-python>=4.8" "pillow>=10.0" "flask>=3.0"
 ```
 
 ## 3. 运行方式
+
+本项目提供网页版和命令行版，两种方式共用同一套图片处理逻辑，功能一致。
+
+### 3.1 启动网页版（推荐）
+
+在项目根目录执行：
+
+```bash
+uv sync
+uv run python app.py
+```
+
+看到类似下面的提示后，用浏览器打开 <http://127.0.0.1:5000>：
+
+```text
+图片编辑网页已启动：http://127.0.0.1:5000
+ * Running on http://127.0.0.1:5000
+```
+
+按 `Ctrl+C` 可以停止服务。
+
+> 网页版上传的图片和处理结果临时保存在系统临时目录，不会写入项目仓库；
+> 重启服务后需要重新上传图片。
+
+### 3.2 网页版操作步骤
+
+1. 把图片拖到左侧虚线区域，或点击该区域选择文件（支持 JPG / PNG / BMP / WEBP，最大 20 MB）；
+2. 页面会显示图片预览，以及文件名、格式、宽高、颜色模式、文件大小；
+3. 在右侧选择操作：
+   - **缩放**：填写宽度或高度，留空的一项会按原图比例自动计算；
+   - **裁剪**：填写 left / top / right / bottom，默认已填入整张图的坐标；
+   - **旋转**：选择 90° / 180° / 270°；
+   - **翻转**：选择水平或垂直；
+   - **灰度化**：无需参数；
+   - **格式转换**：配合“输出格式”使用；
+4. 选择输出格式（也可以保持原格式），点击 **应用并预览**；
+5. 预览满意后点击 **下载结果**，文件会保存到浏览器默认下载目录；
+6. 可以继续对结果做下一次编辑；点击 **恢复原图** 可回到刚上传时的状态。
+
+> 参数不合法（例如宽度为 0、裁剪越界）时，右侧会显示红色错误提示，程序不会崩溃。
+
+### 3.3 命令行版（可选）
 
 所有命令都在**项目根目录**执行，基本格式为：
 
@@ -90,7 +135,7 @@ uv run python main.py <子命令> <图片路径> [选项]
 - `samples/demo.jpg`：普通彩色图
 - `samples/transparent.png`：带透明通道的 PNG
 
-### 3.1 查看图片信息
+#### 3.3.1 查看图片信息
 
 ```bash
 uv run python main.py info samples/demo.jpg
@@ -106,7 +151,7 @@ uv run python main.py info samples/demo.jpg
 文件大小   : 16.53 KB
 ```
 
-### 3.2 缩放
+#### 3.3.2 缩放
 
 指定宽度，高度按比例自动计算：
 
@@ -128,7 +173,7 @@ uv run python main.py resize samples/demo.jpg -o out_resize2.jpg --width 200 --h
 
 只给 `--height` 时，宽度同样会按比例计算。
 
-### 3.3 裁剪
+#### 3.3.3 裁剪
 
 `--left`、`--top` 为裁剪区域左上角（包含），`--right`、`--bottom` 为右下角（**不包含**）。
 
@@ -145,7 +190,7 @@ uv run python main.py crop samples/demo.jpg -o out_crop.jpg \
 错误: 裁剪区域越界，需满足 0 <= left < right <= 640 且 0 <= top < bottom <= 427，...
 ```
 
-### 3.4 旋转
+#### 3.3.4 旋转
 
 只支持顺时针 90、180、270 度：
 
@@ -153,7 +198,7 @@ uv run python main.py crop samples/demo.jpg -o out_crop.jpg \
 uv run python main.py rotate samples/demo.jpg -o out_rot90.jpg --angle 90
 ```
 
-### 3.5 翻转
+#### 3.3.5 翻转
 
 ```bash
 # 水平翻转（左右镜像）
@@ -163,7 +208,7 @@ uv run python main.py flip samples/demo.jpg -o out_flip_h.jpg --direction horizo
 uv run python main.py flip samples/demo.jpg -o out_flip_v.jpg --direction vertical
 ```
 
-### 3.6 灰度化
+#### 3.3.6 灰度化
 
 ```bash
 uv run python main.py gray samples/demo.jpg -o out_gray.png
@@ -171,7 +216,7 @@ uv run python main.py gray samples/demo.jpg -o out_gray.png
 
 输出图片的颜色模式会变成灰度（`L`）。
 
-### 3.7 格式转换
+#### 3.3.7 格式转换
 
 `convert` 必须用 `-o` 指定输出文件，**扩展名决定目标格式**：
 
@@ -185,7 +230,7 @@ uv run python main.py convert samples/demo.jpg -o out_demo.png
 
 带透明通道的 PNG 转 JPG 时，程序会自动把 RGBA 转成 RGB，不会因为透明通道报错。
 
-### 3.8 关于输出文件
+#### 3.3.8 关于输出文件
 
 - 除 `convert` 外，其余编辑命令的 `-o/--output` 都可以省略；
 - 省略时会在原图旁边自动生成 `原文件名_操作名.扩展名`，例如
@@ -193,7 +238,7 @@ uv run python main.py convert samples/demo.jpg -o out_demo.png
 - 程序**不允许**把结果写回原图路径，避免覆盖原图；
 - 保存成功后会打印完整保存路径和文件大小。
 
-### 3.9 错误提示示例
+#### 3.3.9 错误提示示例
 
 ```bash
 uv run python main.py info not_exist.jpg
@@ -212,10 +257,16 @@ uv run python main.py resize samples/demo.jpg --width 0
 
 ```text
 .
+├── app.py             # 网页版入口：Flask 路由与接口
 ├── main.py            # 命令行入口：解析参数、调用各功能
 ├── image_info.py      # 读取并格式化图片基础信息
 ├── image_io.py        # 图片读写、格式校验、透明通道处理
 ├── image_ops.py       # 缩放、裁剪、旋转、翻转、灰度化
+├── templates/
+│   └── index.html     # 单页工作台页面
+├── static/
+│   ├── style.css      # 页面样式
+│   └── app.js         # 上传、调用接口、预览和下载
 ├── samples/           # 示例图片（体积很小）
 ├── pyproject.toml     # 项目依赖配置
 ├── uv.lock            # uv 锁定的依赖版本
@@ -228,4 +279,6 @@ uv run python main.py resize samples/demo.jpg --width 0
 - 颜色模式由 Pillow 读取，结果为 `RGB`、`RGBA`、`灰度 (L)`、`调色板 (P)` 等；
 - 图片读写使用 `imdecode` / `imencode`，兼容包含中文的路径；
 - 支持保存为 `jpg`、`jpeg`、`png`、`bmp`、`webp`；
-- 旋转只接受 90/180/270，其他角度会由命令行参数校验直接拒绝。
+- 旋转只接受 90/180/270，其他角度会由参数校验直接拒绝；
+- 网页版和命令行版调用的是同一套 `image_ops` / `image_io` / `image_info` 函数；
+- 网页版为本地开发服务器，默认只监听 `127.0.0.1:5000`，不会把图片上传到互联网。
